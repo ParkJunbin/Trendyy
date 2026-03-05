@@ -1,0 +1,19 @@
+{
+  "name": "@fashion/scraper",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "scrape:iconic": "tsx src/iconic.ts",
+    "scrape:universal": "tsx src/universal.ts"
+  },
+  "dependencies": {
+    "playwright": "^1.42.0",
+    "axios": "^1.6.0",
+    "cheerio": "^1.0.0",
+    "pg": "^8.11.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsx": "^4.7.0"
+  }
+}

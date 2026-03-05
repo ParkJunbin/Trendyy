@@ -1,0 +1,17 @@
+{
+  "name": "@fashion/embedding",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "generate": "tsx src/generateEmbeddings.ts"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "pg": "^8.11.0",
+    "@xenova/transformers": "^2.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "tsx": "^4.7.0"
+  }
+}
