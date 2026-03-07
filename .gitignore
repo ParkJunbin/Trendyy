@@ -1,5 +1,70 @@
-node_modules
+
+# ------------------------------
+# Node / pnpm
+# ------------------------------
+node_modules/
+.pnpm-store/
+pnpm-debug.log*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Keep only pnpm-lock.yaml (remove npm/yarn locks)
+package-lock.json
+yarn.lock
+
+# ------------------------------
+# Next.js (App & Pages router)
+# ------------------------------
+.next/
+out/
+.vercel/
+apps/*/.next/
+apps/*/out/
+web/.next/
+web/out/
+
+
+# If you want to be explicit for workspaces:
+apps/*/.next/
+apps/*/out/
+apps/*/.vercel/
+
+# ------------------------------
+# Build / Cache
+# ------------------------------
+dist/
+build/
+.cache/
+turbo/
+.next/cache/
+*.tsbuildinfo
+
+# ------------------------------
+# Env files
+# ------------------------------
 .env
-uploads
-.aws
+.env.*
+!.env.example
+
+# ------------------------------
+# OS / Editor
+# ------------------------------
 .DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ------------------------------
+# Project specific
+# ------------------------------
+uploads/          # user uploads
+databases/        # local DBs
+*.sqlite
+*.db
+.aws/             # AWS credentials/config
+logs/
+*.log
+tmp/
+temp/
+``

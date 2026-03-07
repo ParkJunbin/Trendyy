@@ -10,6 +10,9 @@ importers:
 
   apps/api:
     dependencies:
+      '@xenova/transformers':
+        specifier: ^2.17.2
+        version: 2.17.2
       cors:
         specifier: ^2.8.5
         version: 2.8.6

@@ -1,18 +1,13 @@
+
+// app/page.tsx
 "use client";
 
 import { useState } from "react";
+import UploadForm from "./components/UploadForm";
+import MatchGrid, { Match } from "./components/MatchGrid";
+import styles from "./page.module.css";
 
-type Match = {
-  id: number;
-  title: string;
-  brand: string;
-  category: string;
-  price: number;
-  imagePath: string;
-  similarity: number;
-};
-
-type UploadResponse = {
+export type UploadResponse = {
   message: string;
   filename: string;
   topMatches: Match[];
@@ -20,9 +15,19 @@ type UploadResponse = {
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [matches, setMatches] = useState<Match[]>([]);
+
+  const handleFileChange = (selected: File | null) => {
+    setFile(selected);
+    setMatches([]);
+    setMessage("");
+    // Create/remove preview URL
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(selected ? URL.createObjectURL(selected) : null);
+  };
 
   const handleUpload = async () => {
     if (!file) {
@@ -38,147 +43,53 @@ export default function Home() {
     formData.append("image", file);
 
     try {
-      const res = await fetch("http://localhost:4000/upload", {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/upload", {
         method: "POST",
         body: formData,
       });
 
-      const data: UploadResponse = await res.json();
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
 
-      setMessage(data.message);
+      const data: UploadResponse = await res.json();
+      setMessage(data.message ?? "Upload complete.");
       setMatches(data.topMatches ?? []);
     } catch (error) {
-      setMessage("Upload failed.");
+      setMessage("Upload failed: " + (error as Error).message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main
-      style={{
-        padding: "40px",
-        fontFamily: "Arial, sans-serif",
-        maxWidth: "1100px",
-        margin: "0 auto",
-      }}
-    >
-      <h1 style={{ marginBottom: "8px" }}>Fashion Trend AI</h1>
-      <p style={{ marginTop: 0, color: "#555" }}>
-        Upload a fashion image to get similar item recommendations.
-      </p>
+    <main className={styles.main}>
+      <header className={styles.header}>
+        <h1 className={styles.title}>Fashion Trend AI</h1>
+        <p className={styles.subtitle}>
+          Upload a fashion image to get similar item recommendations.
+        </p>
+      </header>
 
-      <div
-        style={{
-          marginTop: "24px",
-          padding: "24px",
-          border: "1px solid #ddd",
-          borderRadius: "12px",
-          background: "#fafafa",
-        }}
-      >
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            const selected = e.target.files?.[0] ?? null;
-            setFile(selected);
-          }}
+      <section className={styles.panel}>
+        <UploadForm
+          file={file}
+          previewUrl={previewUrl}
+          loading={loading}
+          onFileChange={handleFileChange}
+          onUpload={handleUpload}
+          message={message}
         />
+      </section>
 
-        <div style={{ marginTop: "16px" }}>
-          <button
-            onClick={handleUpload}
-            disabled={loading}
-            style={{
-              padding: "10px 18px",
-              borderRadius: "8px",
-              border: "none",
-              cursor: loading ? "not-allowed" : "pointer",
-              background: "#111",
-              color: "#fff",
-            }}
-          >
-            {loading ? "Uploading..." : "Upload"}
-          </button>
-        </div>
-
-        {file && (
-          <p style={{ marginTop: "12px", color: "#444" }}>
-            Selected file: <strong>{file.name}</strong>
-          </p>
-        )}
-
-        {message && (
-          <p style={{ marginTop: "12px", color: "#222" }}>{message}</p>
-        )}
-      </div>
-
-      <section style={{ marginTop: "36px" }}>
-        <h2 style={{ marginBottom: "16px" }}>Recommended Items</h2>
-
+      <section className={styles.results}>
+        <h2 className={styles.resultsTitle}>Recommended Items</h2>
         {matches.length === 0 ? (
-          <p style={{ color: "#666" }}>
+          <p className={styles.empty}>
             No recommendations yet. Upload an image to see results.
           </p>
         ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: "20px",
-            }}
-          >
-            {matches.map((match) => (
-              <div
-                key={match.id}
-                style={{
-                  border: "1px solid #ddd",
-                  borderRadius: "12px",
-                  padding: "16px",
-                  background: "#fff",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                }}
-              >
-                <div
-                  style={{
-                    height: "160px",
-                    borderRadius: "8px",
-                    background: "#f2f2f2",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: "12px",
-                    color: "#777",
-                    fontSize: "14px",
-                  }}
-                >
-                  Image placeholder
-                </div>
-
-                <h3 style={{ margin: "0 0 8px 0", fontSize: "18px" }}>
-                  {match.title}
-                </h3>
-
-                <p style={{ margin: "4px 0", color: "#555" }}>
-                  <strong>Brand:</strong> {match.brand}
-                </p>
-
-                <p style={{ margin: "4px 0", color: "#555" }}>
-                  <strong>Category:</strong> {match.category}
-                </p>
-
-                <p style={{ margin: "4px 0", color: "#555" }}>
-                  <strong>Price:</strong> ${match.price.toFixed(2)}
-                </p>
-
-                <p style={{ margin: "4px 0", color: "#555" }}>
-                  <strong>Similarity:</strong>{" "}
-                  {(match.similarity * 100).toFixed(1)}%
-                </p>
-              </div>
-            ))}
-          </div>
+          <MatchGrid matches={matches} />
         )}
       </section>
     </main>
