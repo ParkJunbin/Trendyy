@@ -9,14 +9,13 @@ export type EmbeddedProduct = Product & {
 let cachedProducts: EmbeddedProduct[] | null = null;
 
 export async function getEmbeddedProducts(): Promise<EmbeddedProduct[]> {
-  if (cachedProducts) {
-    return cachedProducts;
-  }
+  if (cachedProducts) return cachedProducts;
 
   const embeddedProducts: EmbeddedProduct[] = [];
 
   for (const product of products) {
     const absoluteImagePath = path.join(process.cwd(), product.imagePath);
+
     const embedding = await getImageEmbedding(absoluteImagePath);
 
     embeddedProducts.push({

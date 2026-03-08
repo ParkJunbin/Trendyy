@@ -1,19 +1,29 @@
-import { pipeline } from "@xenova/transformers";
+import {
+  SiglipVisionModel,
+  AutoProcessor,
+  RawImage,
+} from "@huggingface/transformers";
 
-let extractor: Awaited<ReturnType<typeof pipeline>> | null = null;
+const model_id = "Marqo/marqo-fashionSigLIP";
+
+let processor: AutoProcessor | null = null;
+let visionModel: SiglipVisionModel | null = null;
+
+async function loadModel() {
+  if (!processor || !visionModel) {
+    processor = await AutoProcessor.from_pretrained(model_id);
+    visionModel = await SiglipVisionModel.from_pretrained(model_id);
+  }
+}
 
 export async function getImageEmbedding(imagePath: string): Promise<number[]> {
-  if (!extractor) {
-    extractor = await pipeline(
-      "image-feature-extraction",
-      "Xenova/clip-vit-base-patch32"
-    );
-  }
+  await loadModel();
 
-  const output = await extractor(imagePath, {
-    pooling: "mean",
-    normalize: true,
-  });
+  const image = await RawImage.read(imagePath);
 
-  return Array.from(output.data as Float32Array);
+  const inputs = await (processor as any)(image);
+
+  const { image_embeds } = await visionModel!(inputs);
+
+  return image_embeds.normalize().tolist()[0];
 }
