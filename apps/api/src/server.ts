@@ -3,9 +3,9 @@ import cors from "cors";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
-import { getImageEmbedding } from "./embedImage";
-import { getEmbeddedProducts } from "./embedProducts";
 import { cosineSimilarity } from "./similarity";
+import { getImageEmbedding } from "./ai/embedImage";
+import { getAllProducts } from "./database/products";
 
 const app = express();
 
@@ -39,16 +39,14 @@ app.post("/upload", upload.single("image"), async (req: Request, res: Response) 
       return res.status(400).json({ message: "No file uploaded" });
     }
 
+    // generate embedding for uploaded image
     const queryEmbedding = await getImageEmbedding(req.file.path);
-    const embeddedProducts = await getEmbeddedProducts();
 
-    const scoredProducts = embeddedProducts.map((product) => ({
-      id: product.id,
-      title: product.title,
-      brand: product.brand,
-      category: product.category,
-      price: product.price,
-      imagePath: product.imagePath,
+    // fetch products from DynamoDB
+    const products = await getAllProducts();
+
+    const scoredProducts = products.map((product) => ({
+      ...product,
       similarity: cosineSimilarity(queryEmbedding, product.embedding),
     }));
 
@@ -66,6 +64,7 @@ app.post("/upload", upload.single("image"), async (req: Request, res: Response) 
     });
   }
 });
+
 
 app.listen(4000, () => {
   console.log("API running on http://localhost:4000");
