@@ -12,5 +12,5 @@
 
     "sourceMap": true
   },
-  "include": ["src/**/*.ts", "src/ai/embedImage.ts"]
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/ai/embedImage.ts"]
 }

@@ -58,13 +58,18 @@ Thumbs.db
 # ------------------------------
 # Project specific
 # ------------------------------
-uploads/          # user uploads
-databases/        # local DBs
+uploads/
+databases/
 *.sqlite
 *.db
-.aws/             # AWS credentials/config
+.aws/
 logs/
 *.log
 tmp/
 temp/
-``
+
+# ------------------------------
+# Python caches
+# ------------------------------
+__pycache__/
+*.pyc

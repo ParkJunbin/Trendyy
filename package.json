@@ -10,6 +10,15 @@
     "dev": "pnpm -r dev",
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "db:migrate": "pnpm --filter @fashion/api db:migrate",
+    "db:ensure-table": "pnpm --filter @fashion/api db:ensure-table",
+    "api:dev": "pnpm --filter @fashion/api dev",
+    "worker:pending": "pnpm --filter @fashion/api worker:process-pending",
+    "worker:pending:once": "pnpm --filter @fashion/api worker:process-pending:once",
+    "pipeline:test-image": "pnpm --filter @fashion/api pipeline:test-image",
+    "scraper:iconic": "pnpm --filter @fashion/scraper scrape:iconic",
+    "scraper:universal": "pnpm --filter @fashion/scraper scrape:universal",
+    "embedding:generate": "pnpm --filter @fashion/embedding generate"
   }
 }
