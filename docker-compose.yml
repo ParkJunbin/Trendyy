@@ -1,0 +1,8 @@
+
+services:
+  py-worker:
+    build: ./apps/py-embed-worker
+    environment:
+      - FASHION_MODEL_ID=Marqo/marqo-fashionSigLIP
+    ports:
+      - "8000:8000"
