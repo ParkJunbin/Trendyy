@@ -1,8 +1,24 @@
+version: "3.9"
 
 services:
+  web:
+    build: ./apps/web
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:4000
+
+  backend:
+    build: ./apps/backend
+    ports:
+      - "4000:4000"
+    environment:
+      - PY_WORKER_URL=http://localhost:8000
+
+
   py-worker:
     build: ./apps/py-embed-worker
-    environment:
-      - FASHION_MODEL_ID=Marqo/marqo-fashionSigLIP
     ports:
       - "8000:8000"
+    environment:
+      - FASHION_MODEL_ID=Marqo/marqo-fashionSigLIP

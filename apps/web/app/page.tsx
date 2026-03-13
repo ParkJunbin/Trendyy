@@ -43,7 +43,7 @@ export default function Home() {
     formData.append("image", file);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/upload", {
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000/embed/file", {
         method: "POST",
         body: formData,
       });

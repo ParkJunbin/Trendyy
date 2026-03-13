@@ -1,0 +1,11 @@
+node_modules
+.next
+out
+npm-debug.log
+yarn-error.log
+.pnpm-store
+.env.local
+.env.development
+.env.test
+.env.production
+.DS_Store
