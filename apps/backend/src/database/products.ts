@@ -11,7 +11,16 @@ export type Product = {
   imagePath: string;
 };
 
-export async function saveProduct(product: Product & { embedding: number[] }) {
+// NEW: Products now carry vector + dim (embedding dimension).
+export type ProductWithVector = Product & {
+  vector: number[];  // normalized SigLIP embedding
+  dim: number;       // e.g., 768
+  normalized?: boolean;  // true for SigLIP in your code
+};
+
+
+
+export async function saveProduct(product: ProductWithVector) {
   await db.send(
     new PutItemCommand({
       TableName: "products",
@@ -22,15 +31,21 @@ export async function saveProduct(product: Product & { embedding: number[] }) {
         category: { S: product.category },
         price: { N: product.price.toString() },
         imagePath: { S: product.imagePath },
-        embedding: {
-          L: product.embedding.map((v) => ({ N: v.toString() })),
-        },
+
+        // CHANGED: store as "vector" + "dim"
+        vector: { L: product.vector.map((v) => ({ N: v.toString() })) },
+        dim: { N: product.dim.toString() },
+
+        // optional fields if you track them
+        ...(product.normalized !== undefined
+          ? { normalized: { BOOL: product.normalized } }
+          : {}),
       },
     })
   );
 }
 
-export async function getAllProducts() {
+export async function getAllProducts(): Promise<ProductWithVector[]> {
   const res = await db.send(
     new ScanCommand({
       TableName: "products",
@@ -39,5 +54,5 @@ export async function getAllProducts() {
 
   if (!res.Items) return [];
 
-  return res.Items.map((item) => unmarshall(item));
+  return res.Items.map((item) => unmarshall(item)) as ProductWithVector[];
 }

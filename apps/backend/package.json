@@ -13,9 +13,11 @@
     "@aws-sdk/util-dynamodb": "^3.996.2",
     "@huggingface/transformers": "^3.8.1",
     "@xenova/transformers": "^2.17.2",
+    "axios": "^1.13.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.0",
     "express": "^4.19.0",
+    "form-data": "^4.0.5",
     "multer": "^1.4.5-lts.1",
     "pg": "^8.11.0",
     "pgvector": "^0.1.8"

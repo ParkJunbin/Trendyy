@@ -76,6 +76,9 @@ def healthz():
     return {"ok": True, "model": MODEL_ID}
 
 
+#-------------------------------------------
+# returns {vector, dimension} of the image
+#-------------------------------------------
 # for url input
 @app.post("/embed/url")
 def embed_from_url(image_url: str):

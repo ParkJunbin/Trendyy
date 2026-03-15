@@ -1,29 +1,35 @@
-import {
-  SiglipVisionModel,
-  AutoProcessor,
-  RawImage,
-} from "@huggingface/transformers";
 
-const model_id = "Marqo/marqo-fashionSigLIP";
+import fs from "fs";
+import path from "path";
+import FormData from "form-data";
+import axios from "axios";
 
-let processor: AutoProcessor | null = null;
-let visionModel: SiglipVisionModel | null = null;
+const EMBED_API_URL =
+  process.env.EMBED_API_URL ?? "http://localhost:8000/embed/file";
 
-async function loadModel() {
-  if (!processor || !visionModel) {
-    processor = await AutoProcessor.from_pretrained(model_id);
-    visionModel = await SiglipVisionModel.from_pretrained(model_id);
-  }
+export async function getImageEmbedding(
+  filePath: string
+): Promise<{ vector: number[]; dim: number }> {
+  const form = new FormData();
+
+  form.append("file", fs.createReadStream(filePath), {
+    filename: path.basename(filePath),
+    contentType: mimeFromExt(filePath) ?? "application/octet-stream",
+  });
+
+  const res = await axios.post(EMBED_API_URL, form, {
+    headers: form.getHeaders(),
+    maxBodyLength: Infinity,
+    maxContentLength: Infinity,
+  });
+
+  return res.data as { vector: number[]; dim: number };
 }
 
-export async function getImageEmbedding(imagePath: string): Promise<number[]> {
-  await loadModel();
-
-  const image = await RawImage.read(imagePath);
-
-  const inputs = await (processor as any)(image);
-
-  const { image_embeds } = await visionModel!(inputs);
-
-  return image_embeds.normalize().tolist()[0];
+function mimeFromExt(name: string): string | undefined {
+  const ext = path.extname(name).toLowerCase();
+  if (ext === ".jpg" || ext === ".jpeg") return "image/jpeg";
+  if (ext === ".png") return "image/png";
+  if (ext === ".webp") return "image/webp";
+  return undefined;
 }
