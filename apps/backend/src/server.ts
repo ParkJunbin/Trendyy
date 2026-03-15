@@ -4,9 +4,9 @@ import multer from "multer";
 import dotenv from "dotenv";
 
 import { getImageEmbedding } from "./ai/embedImage";
-import { getAllProducts, ProductWithVector } from "./database/products";
+import { getAllProducts, ProductWithVector, saveProduct } from "./database/dynamodb/products";
 import { rankProductsBySimilarity } from "./helper/rank";
-import { uploadToS3, getPresignedUrl } from "./lib/s3";
+import { uploadToS3, getPresignedUrl } from "./database/s3/s3";
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
 
     // 1. Upload image to S3
     const key = `uploads/${Date.now()}-${req.file.originalname}`;
-    await uploadToS3(req.file.buffer, key, req.file.mimetype);
+    const imageUrl = await uploadToS3(req.file.buffer, key, req.file.mimetype);
 
     // 2. Generate a presigned URL so the embed model can read the image
     const signedUrl = await getPresignedUrl(key);
@@ -38,7 +38,24 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
     // 3. Generate embedding using the signed S3 URL
     const { vector, dim } = await getImageEmbedding(signedUrl);
 
-    // 4. Fetch products and rank by similarity
+    // 4. Save product (with vector + dim) to DynamoDB
+    const product: ProductWithVector = {
+      id: Date.now(), // or use uuid/ulid
+      title: (req.body?.title ?? req.file.originalname) as string,
+      brand: (req.body?.brand ?? "") as string,
+      category: (req.body?.category ?? "") as string,
+      price: Number(req.body?.price ?? 0),
+      imagePath: imageUrl,   // store the permanent public S3 URL
+
+      vector,
+      dim,
+      normalized: true,      // your worker returns normalized embeddings
+    };
+
+    await saveProduct(product);
+
+
+    // 5. Fetch products and rank by similarity
     const products = (await getAllProducts()) as ProductWithVector[];
     const topMatches = rankProductsBySimilarity(vector, products, 3, true);
 

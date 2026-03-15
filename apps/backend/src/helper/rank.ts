@@ -1,5 +1,5 @@
 
-import { ProductWithVector } from "../database/products";
+import { ProductWithVector } from "../database/dynamodb/products";
 import { similarityNormalized, cosine } from "./similarity";
 
 export type ScoredProduct = ProductWithVector & { similarity: number };

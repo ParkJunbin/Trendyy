@@ -1,5 +1,5 @@
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 
 export const db = new DynamoDBClient({
-  region: "ap-southeast-2",
+  region: process.env.AWS_REGION ?? "ap-southeast-2",
 });
