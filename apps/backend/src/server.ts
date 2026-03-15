@@ -1,50 +1,52 @@
-
 import express, { Request, Response } from "express";
 import cors from "cors";
 import multer from "multer";
-import path from "path";
-import fs from "fs";
+import dotenv from "dotenv";
 
 import { getImageEmbedding } from "./ai/embedImage";
 import { getAllProducts, ProductWithVector } from "./database/products";
 import { rankProductsBySimilarity } from "./helper/rank";
+import { uploadToS3, getPresignedUrl } from "./lib/s3";
+
+dotenv.config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-const uploadDir = path.join(process.cwd(), "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, uploadDir),
-  filename: (_req, file, cb) => cb(null, `${Date.now()}-${file.originalname}`),
-});
-const upload = multer({ storage });
+// Memory storage — file goes straight to S3, not disk
+const upload = multer({ storage: multer.memoryStorage() });
 
 app.get("/", (_req: Request, res: Response) => {
   res.send("Fashion Trend API running");
 });
 
-// NEW: return top matches with new product shape
 app.post("/upload", upload.single("file"), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const { vector, dim } = await getImageEmbedding(req.file.path);
+    // 1. Upload image to S3
+    const key = `uploads/${Date.now()}-${req.file.originalname}`;
+    await uploadToS3(req.file.buffer, key, req.file.mimetype);
 
+    // 2. Generate a presigned URL so the embed model can read the image
+    const signedUrl = await getPresignedUrl(key);
+
+    // 3. Generate embedding using the signed S3 URL
+    const { vector, dim } = await getImageEmbedding(signedUrl);
+
+    // 4. Fetch products and rank by similarity
     const products = (await getAllProducts()) as ProductWithVector[];
-
     const topMatches = rankProductsBySimilarity(vector, products, 3, true);
 
     return res.json({
       message: "Upload and recommendation successful",
-      filename: req.file.filename,
+      filename: key,
       topMatches,
-      queryDim: dim, // optional: useful for debugging
+      queryDim: dim,
     });
   } catch (error) {
     console.error(error);

@@ -43,10 +43,13 @@ export default function Home() {
     formData.append("file", file);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
