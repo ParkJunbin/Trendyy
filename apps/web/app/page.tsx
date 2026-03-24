@@ -11,7 +11,20 @@ export type UploadResponse = {
   message: string;
   filename: string;
   topMatches: Match[];
+  tags?: TagsResponse;
 };
+
+export type TagScore = {
+  tag: string;
+  score: number;
+};
+
+export type TagsResponse = {
+  category?: TagScore[];
+  color?: TagScore[];
+  material?: TagScore[];
+};
+
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -19,9 +32,11 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [matches, setMatches] = useState<Match[]>([]);
+  const [tags, setTags] = useState<TagsResponse | null>(null);
 
   const handleFileChange = (selected: File | null) => {
     setFile(selected);
+    setTags(null);
     setMatches([]);
     setMessage("");
     // Create/remove preview URL
@@ -41,9 +56,10 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("threshold", "0.6");
 
     try {
-      const res = await fetch(
+      const uploadRes = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000"}/upload`,
         {
           method: "POST",
@@ -51,13 +67,14 @@ export default function Home() {
         }
       );
 
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+      if (!uploadRes.ok) {
+        throw new Error(`HTTP ${uploadRes.status}`);
       }
 
-      const data: UploadResponse = await res.json();
+      const data: UploadResponse = await uploadRes.json();
       setMessage(data.message ?? "Upload complete.");
       setMatches(data.topMatches ?? []);
+      setTags(data.tags ?? null);
     } catch (error) {
       setMessage("Upload failed: " + (error as Error).message);
     } finally {
@@ -92,7 +109,7 @@ export default function Home() {
             No recommendations yet. Upload an image to see results.
           </p>
         ) : (
-          <MatchGrid matches={matches} />
+          <MatchGrid matches={matches} categoryTags={tags?.category} />
         )}
       </section>
     </main>

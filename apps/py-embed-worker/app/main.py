@@ -16,6 +16,37 @@ import open_clip
 # -------------------------------
 MODEL_ID = "Marqo/marqo-fashionSigLIP"
 
+
+CATEGORY_TAGS = [
+    "t-shirt",
+    "dress",
+    "jacket",
+    "pants",
+    "skirt",
+    "sneakers",
+    "heels"
+]
+
+COLOR_TAGS = [
+    "black",
+    "white",
+    "red",
+    "blue",
+    "green",
+    "brown",
+    "beige"
+]
+
+MATERIAL_TAGS = [
+    "cotton",
+    "denim",
+    "leather",
+    "silk",
+    "wool",
+    "polyester"
+]
+
+
 try:
     # Create model and preprocessing transforms directly from the HF Hub
     # (as per the model card)
@@ -60,6 +91,54 @@ def _embed_text(text: str):
         tokens = tokenizer([text]).to(DEVICE)                # (1, L)
         feats = model.encode_text(tokens, normalize=True)    # (1, D)
     return feats.squeeze(0).cpu().numpy().tolist()
+
+# compares image with tags
+def _score_image_against_texts(
+    img: Image.Image,
+    candidate_texts: list[str]
+):
+    """
+    Returns list of (text, score) using softmax-normalized similarity.
+    """
+    with torch.inference_mode():
+        image_tensor = preprocess_val(img).unsqueeze(0).to(DEVICE)
+        image_feat = model.encode_image(image_tensor, normalize=True)  # (1, D)
+
+        text_tokens = tokenizer(candidate_texts).to(DEVICE)
+        text_feat = model.encode_text(text_tokens, normalize=True)  # (N, D)
+
+        # cosine similarity → softmax
+        scores = (image_feat @ text_feat.T).squeeze(0)
+        probs = (scores * 100.0).softmax(dim=-1)
+
+    return [
+        {"tag": t, "score": float(p)}
+        for t, p in zip(candidate_texts, probs.cpu())
+    ]
+
+def _auto_tag_image(
+    img: Image.Image,
+    threshold: float = 0.6
+):
+    """
+    Run zero-shot tagging across all tag groups.
+    """
+    results = {}
+
+    tag_groups = {
+        "category": CATEGORY_TAGS,
+        "color": COLOR_TAGS,
+        "material": MATERIAL_TAGS,
+    }
+
+    for group, tags in tag_groups.items():
+        scored = _score_image_against_texts(img, tags)
+        results[group] = [
+            s for s in scored if s["score"] >= threshold
+        ]
+
+    return results
+
 
 
 # -------------------------------
@@ -109,6 +188,41 @@ def embed_text(q: str = Form(...)):
     try:
         vec = _embed_text(q)
         return {"vector": vec, "dim": len(vec)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@app.post("/tag/file")
+async def tag_from_upload(
+    file: UploadFile = File(...),
+    threshold: float = Form(0.6)
+):
+    try:
+        img = Image.open(io.BytesIO(await file.read())).convert("RGB")
+        tags = _auto_tag_image(img, threshold)
+        return {
+            "tags": tags,
+            "threshold": threshold
+        }
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/tag/url")
+def tag_from_url(
+    image_url: str = Form(...),
+    threshold: float = Form(0.6)
+):
+    try:
+        r = requests.get(image_url, timeout=10)
+        r.raise_for_status()
+        img = Image.open(io.BytesIO(r.content)).convert("RGB")
+
+        tags = _auto_tag_image(img, threshold)
+        return {
+            "tags": tags,
+            "threshold": threshold
+        }
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 

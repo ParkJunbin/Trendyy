@@ -45,6 +45,11 @@
   color: #555;
 }
 
+.tagMatch {
+  color: #0a7a52;
+  font-weight: 600;
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

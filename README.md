@@ -3,4 +3,4 @@ Get your trends right
 
 
 # Dependencies
-docker compose up --buid py-worker
+docker compose up --build py-worker

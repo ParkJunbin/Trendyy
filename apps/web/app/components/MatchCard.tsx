@@ -4,7 +4,12 @@
 import styles from "./components.module.css";
 import type { Match } from "./MatchGrid";
 
-export default function MatchCard({ match }: { match: Match }) {
+type Props = {
+  match: Match;
+  matchedCategoryTag?: string | null;
+};
+
+export default function MatchCard({ match, matchedCategoryTag }: Props) {
   return (
     <article className={styles.card}>
       <div className={styles.imageWrap}>
@@ -27,6 +32,9 @@ export default function MatchCard({ match }: { match: Match }) {
 
       <p className={styles.meta}>
         <strong>Category:</strong> {match.category}
+        {matchedCategoryTag ? (
+          <span className={styles.tagMatch}> · tag: {matchedCategoryTag}</span>
+        ) : null}
       </p>
 
       <p className={styles.meta}>

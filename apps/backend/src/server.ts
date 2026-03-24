@@ -4,6 +4,7 @@ import multer from "multer";
 import dotenv from "dotenv";
 
 import { getImageEmbedding } from "./ai/embedImage";
+import { getImageTags } from "./ai/tagImage";
 import { getAllProducts, ProductWithVector, saveProduct } from "./database/dynamodb/products";
 import { rankProductsBySimilarity } from "./helper/rank";
 import { uploadToS3, getPresignedUrl } from "./database/s3/s3";
@@ -22,11 +23,50 @@ app.get("/", (_req: Request, res: Response) => {
   res.send("Fashion Trend API running");
 });
 
+app.post("/tag/file", upload.single("file"), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    const threshold = Number(req.body?.threshold ?? 0.6);
+    const tags = await getImageTags(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      threshold
+    );
+
+    return res.json(tags);
+  } catch (error) {
+    console.error(error);
+    return res.status(502).json({ message: "Tagging failed" });
+  }
+});
+
 app.post("/upload", upload.single("file"), async (req: Request, res: Response) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
+
+    const tagThreshold = Number(req.body?.threshold ?? 0.6);
+    const tagResult = await getImageTags(
+      req.file.buffer,
+      req.file.originalname,
+      req.file.mimetype,
+      tagThreshold
+    );
+    const detectedCategoryTags = (tagResult.tags.category ?? []).map((item) => item.tag);
+    const detectedColorTags = (tagResult.tags.color ?? []).map((item) => item.tag);
+    const detectedMaterialTags = (tagResult.tags.material ?? []).map((item) => item.tag);
+    const combinedTags = [
+      ...detectedCategoryTags,
+      ...detectedColorTags,
+      ...detectedMaterialTags,
+    ];
+    const uniqueTags = [...new Set(combinedTags)];
+    const categoryFromTags = uniqueTags.join(", ");
 
     // 1. Upload image to S3
     const key = `uploads/${Date.now()}-${req.file.originalname}`;
@@ -43,7 +83,7 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
       id: Date.now(), // or use uuid/ulid
       title: (req.body?.title ?? req.file.originalname) as string,
       brand: (req.body?.brand ?? "") as string,
-      category: (req.body?.category ?? "") as string,
+      category: (categoryFromTags || req.body?.category || "") as string,
       price: Number(req.body?.price ?? 0),
       imagePath: imageUrl,   // store the permanent public S3 URL
 
@@ -64,6 +104,8 @@ app.post("/upload", upload.single("file"), async (req: Request, res: Response) =
       filename: key,
       topMatches,
       queryDim: dim,
+      tags: tagResult.tags,
+      tagThreshold: tagResult.threshold,
     });
   } catch (error) {
     console.error(error);
