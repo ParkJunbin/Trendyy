@@ -12,6 +12,8 @@ export type UploadResponse = {
   filename: string;
   topMatches: Match[];
   tags?: TagsResponse;
+  queryDim?: number;
+  imageUrl?: string;
 };
 
 export type TagScore = {
@@ -72,7 +74,11 @@ export default function Home() {
       }
 
       const data: UploadResponse = await uploadRes.json();
-      setMessage(data.message ?? "Upload complete.");
+      setMessage(
+        data.queryDim
+          ? `${data.message ?? "Upload complete."} Embedding dimension: ${data.queryDim}.`
+          : data.message ?? "Upload complete."
+      );
       setMatches(data.topMatches ?? []);
       setTags(data.tags ?? null);
     } catch (error) {
