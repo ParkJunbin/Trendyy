@@ -1,0 +1,23 @@
+
+# Web & server
+fastapi==0.135.1
+uvicorn[standard]==0.41.0
+
+# Core ML stack (OpenCLIP route)
+torch==2.10.0
+torchvision               # match your torch install (use PyTorch selector for CUDA/CPU)
+timm==1.0.25
+open-clip-torch==3.3.0
+transformers==5.3.0
+
+# Model I/O & utilities
+safetensors==0.7.0
+regex==2026.2.28
+ftfy==6.3.1
+huggingface-hub          # pulled in by open-clip, explicit pin optional
+tqdm                     # pulled in by open-clip, explicit pin optional
+
+# Imaging & misc
+Pillow==12.1.1
+requests==2.32.5
+python-multipart==0.0.22

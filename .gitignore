@@ -1,4 +1,3 @@
-
 # ------------------------------
 # Node / pnpm
 # ------------------------------
@@ -23,7 +22,6 @@ apps/*/.next/
 apps/*/out/
 web/.next/
 web/out/
-
 
 # If you want to be explicit for workspaces:
 apps/*/.next/
@@ -58,13 +56,42 @@ Thumbs.db
 # ------------------------------
 # Project specific
 # ------------------------------
-uploads/          # user uploads
-databases/        # local DBs
+uploads/
+databases/
 *.sqlite
 *.db
-.aws/             # AWS credentials/config
+.aws/
 logs/
 *.log
 tmp/
 temp/
-``
+
+# ------------------------------
+# Python
+# ------------------------------
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.eggs/
+venv/
+.venv/
+env/
+*.egg
+
+# ------------------------------
+# Scrapy
+# ------------------------------
+.scrapy/
+
+# ------------------------------
+# Secrets / Keys
+# ------------------------------
+*.pem
+*.key
+*.p12
+*.pfx
+secrets/
+credentials/
