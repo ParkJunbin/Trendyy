@@ -1,0 +1,14 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #F4F2EE;
+  font-family: 'DM Sans', sans-serif;
+}
+
+button {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar { height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(35,31,32,0.12); border-radius: 4px; }
