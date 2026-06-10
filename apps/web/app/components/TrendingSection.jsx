@@ -1,5 +1,3 @@
-"use client";
-
 import { COLORS, TRENDING } from "./constants";
 import { IconCamera, IconTrend } from "./Icons";
 
@@ -8,6 +6,7 @@ import { IconCamera, IconTrend } from "./Icons";
 function TrendingCard({ item }) {
   return (
     <div
+      className="trending-card"
       style={{
         borderRadius: 12,
         overflow: "hidden",
@@ -17,14 +16,6 @@ function TrendingCard({ item }) {
         transition: "transform 0.18s, box-shadow 0.18s",
         flexShrink: 0,
         width: 160,
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = "translateY(-3px)";
-        e.currentTarget.style.boxShadow = "0 8px 24px rgba(35,31,32,0.1)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = "translateY(0)";
-        e.currentTarget.style.boxShadow = "none";
       }}
     >
       {/* Image placeholder — swap for a real <img> once API data is available */}

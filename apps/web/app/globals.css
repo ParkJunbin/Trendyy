@@ -12,3 +12,115 @@ button {
 ::-webkit-scrollbar { height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(35,31,32,0.12); border-radius: 4px; }
+
+/* Trending card hover styles (used by TrendingSection) */
+.trending-card {
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.trending-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(35,31,32,0.1);
+}
+
+/* Design tokens (mirror of COLORS) */
+:root {
+  --bg: #F4F2EE;
+  --bg-card: #ECEAE5;
+  --bg-upload: rgba(158,107,74,0.06);
+  --mocha: #9E6B4A;
+  --mocha-hover: #8A5A3B;
+  --mocha-light: rgba(158,107,74,0.12);
+  --ink: #231F20;
+  --muted: #A09898;
+  --border: rgba(35,31,32,0.12);
+  --border-strong: rgba(158,107,74,0.4);
+}
+
+/* AppClient / topbar */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 36px;
+  position: relative;
+  z-index: 10;
+  border-bottom: 0.5px solid var(--border);
+  background: var(--bg);
+}
+.menu-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--ink);
+  display: flex;
+}
+.brand-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.14em;
+  color: var(--ink);
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  user-select: none;
+}
+.beta-badge {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--mocha);
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* Hero / upload area */
+.hero-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 52px 24px 48px;
+  gap: 28px;
+}
+.hero-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(40px, 7vw, 60px);
+  letter-spacing: 0.06em;
+  color: var(--ink);
+  text-align: center;
+  line-height: 1;
+}
+
+/* Search button */
+.search-btn {
+  width: 100%;
+  max-width: 480px;
+  padding: 15px 48px;
+  background: rgba(158,107,74,0.25);
+  color: var(--muted);
+  border: none;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 19px;
+  letter-spacing: 0.12em;
+  border-radius: 10px;
+  cursor: not-allowed;
+  transition: background 0.2s, transform 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.search-btn.active {
+  background: var(--mocha);
+  color: #F4F2EE;
+  cursor: pointer;
+}
+.search-btn.active:hover {
+  background: var(--mocha-hover);
+}
+.search-btn:active {
+  transform: scale(0.98);
+}
+
