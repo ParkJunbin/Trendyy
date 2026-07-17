@@ -1,0 +1,33 @@
+{
+  "site_id": "iconic",
+  "retailer": "the_iconic",
+  "base_url": "https://www.theiconic.com.au",
+  "start_urls": [
+    "https://www.theiconic.com.au/womens-clothing/"
+  ],
+  "playwright": {
+    "listing_wait_ms": 3000,
+    "product_wait_ms": 2000
+  },
+  "selectors": {
+    "listing_product": "div.product",
+    "listing_product_link": "a.product-image-link::attr(href)",
+    "sku": "::attr(data-ti-track-product)",
+    "brand": "span.brand::text",
+    "title": "span.name::text",
+    "price": "span.price::text",
+    "pagination_next": "li.arrow a[rel='next']::attr(href)",
+    "images": [
+      "img.product-image::attr(src)",
+      "[class*='gallery'] img::attr(src)",
+      "figure img::attr(src)"
+    ],
+    "breadcrumb": ".breadcrumb a::text"
+  },
+  "taxonomy": {
+    "gender_default": "Women",
+    "gender_index": 1,
+    "category_index": 2,
+    "subcategory_index": 3
+  }
+}
