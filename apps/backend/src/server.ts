@@ -3,8 +3,13 @@ import cors from "cors";
 import multer from "multer";
 import dotenv from "dotenv";
 
+import { getTextEmbedding } from "./ai/embedText";
 import { getImageTags } from "./ai/tagImage";
 import { processUploadedProduct } from "./database/dynamodb/uploadProduct";
+import {
+  getAllProducts,
+  searchProductsByEmbedding,
+} from "./database/dynamodb/products";
 
 dotenv.config();
 
@@ -38,6 +43,25 @@ app.post("/tag/file", upload.single("file"), async (req: Request, res: Response)
   } catch (error) {
     console.error(error);
     return res.status(502).json({ message: "Tagging failed" });
+  }
+});
+
+app.get("/search", async (req: Request, res: Response) => {
+  try {
+    const query = String(req.query.q ?? "").trim();
+
+    if (!query) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const { vector, dim } = await getTextEmbedding(query);
+    const products = await getAllProducts();
+    const matches = searchProductsByEmbedding(vector, products);
+
+    return res.json({ query, queryDim: dim, matches });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Search failed" });
   }
 });
 

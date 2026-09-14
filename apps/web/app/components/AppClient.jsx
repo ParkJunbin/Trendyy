@@ -2,28 +2,13 @@
 
 import { useState } from "react";
 import { COLORS } from "./constants";
-import { IconMenu, IconSearch } from "./Icons";
+import { IconMenu } from "./Icons";
 import Drawer from "./Drawer";
-import UploadZone from "./UploadZone";
+// import UploadZone from "./UploadZone";
+import ImageSearch from "./ImageSearch";
 
 export default function AppClient() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [imageURL, setImageURL] = useState(null);
-
-  const handleImage = (file) => {
-    if (imageURL) URL.revokeObjectURL(imageURL);
-    setImageURL(URL.createObjectURL(file));
-  };
-
-  const handleClear = () => {
-    if (imageURL) URL.revokeObjectURL(imageURL);
-    setImageURL(null);
-  };
-
-  const handleSearch = () => {
-    // TODO: POST imageURL to /upload and display results
-    alert("Search will send your image to the /upload API.");
-  };
 
   return (
     <>
@@ -40,21 +25,7 @@ export default function AppClient() {
         <div className="beta-badge">Beta</div>
       </header>
 
-      {/* ── Hero / Upload ── */}
-      <main className="hero-main">
-        <h1 className="hero-title">Look for Anything</h1>
-
-        <UploadZone image={imageURL} onImage={handleImage} onClear={handleClear} />
-
-        <button
-          disabled={!imageURL}
-          onClick={handleSearch}
-          className={imageURL ? "search-btn active" : "search-btn"}
-        >
-          <IconSearch size={17} color="currentColor" />
-          Search Similar Items
-        </button>
-      </main>
+      <ImageSearch />
     </>
   );
 }

@@ -1,9 +1,13 @@
 import { PutItemCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { unmarshall } from "@aws-sdk/util-dynamodb";
+import { rankProductsBySimilarity, ScoredProduct } from "../../helper/rank";
+import { getPresignedUrl } from "../s3/s3";
 import { db } from "./client";
 
+const PRODUCTS_TABLE = "The_Iconic";
+
 export type Product = {
-  id: number;
+  id: string;
   title: string;
   brand: string;
   category: string;
@@ -23,9 +27,9 @@ export type ProductWithVector = Product & {
 export async function saveProduct(product: ProductWithVector) {
   await db.send(
     new PutItemCommand({
-      TableName: "products",
+      TableName: PRODUCTS_TABLE,
       Item: {
-        product_id: { S: product.id.toString() },
+        product_id: { S: product.id },
         title: { S: product.title },
         brand: { S: product.brand },
         category: { S: product.category },
@@ -48,11 +52,36 @@ export async function saveProduct(product: ProductWithVector) {
 export async function getAllProducts(): Promise<ProductWithVector[]> {
   const res = await db.send(
     new ScanCommand({
-      TableName: "products",
+      TableName: PRODUCTS_TABLE,
     })
   );
 
   if (!res.Items) return [];
 
-  return res.Items.map((item) => unmarshall(item)) as ProductWithVector[];
+  const products = res.Items.map((item) => unmarshall(item)) as ProductWithVector[];
+
+  return Promise.all(
+    products.map(async (product) => {
+      if (!product.imagePath) return product;
+
+      try {
+        const imageUrl = new URL(product.imagePath);
+        const objectKey = decodeURIComponent(imageUrl.pathname.replace(/^\/+/, ""));
+        return {
+          ...product,
+          imagePath: await getPresignedUrl(objectKey),
+        };
+      } catch {
+        return product;
+      }
+    })
+  );
+}
+
+export function searchProductsByEmbedding(
+  queryVector: number[],
+  products: ProductWithVector[],
+  topK = 3
+): ScoredProduct[] {
+  return rankProductsBySimilarity(queryVector, products, topK, true);
 }
