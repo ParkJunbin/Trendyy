@@ -58,7 +58,29 @@ export async function getAllProducts(): Promise<ProductWithVector[]> {
 
   if (!res.Items) return [];
 
-  const products = res.Items.map((item) => unmarshall(item)) as ProductWithVector[];
+  return presignProductImages(
+    res.Items.map((item) => unmarshall(item)) as ProductWithVector[]
+  );
+}
+
+export async function getScrapedProducts(): Promise<ProductWithVector[]> {
+  const products = await getAllProducts();
+
+  return products.filter((product) => {
+    if (!product.imagePath) return false;
+
+    try {
+      const imagePath = decodeURIComponent(new URL(product.imagePath).pathname);
+      return imagePath.startsWith("/scraped/");
+    } catch {
+      return false;
+    }
+  });
+}
+
+async function presignProductImages(
+  products: ProductWithVector[]
+): Promise<ProductWithVector[]> {
 
   return Promise.all(
     products.map(async (product) => {

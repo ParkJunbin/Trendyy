@@ -7,7 +7,7 @@ import { getTextEmbedding } from "./ai/embedText";
 import { getImageTags } from "./ai/tagImage";
 import { processUploadedProduct } from "./database/dynamodb/uploadProduct";
 import {
-  getAllProducts,
+  getScrapedProducts,
   searchProductsByEmbedding,
 } from "./database/dynamodb/products";
 
@@ -55,7 +55,7 @@ app.get("/search", async (req: Request, res: Response) => {
     }
 
     const { vector, dim } = await getTextEmbedding(query);
-    const products = await getAllProducts();
+    const products = await getScrapedProducts();
     const matches = searchProductsByEmbedding(vector, products);
 
     return res.json({ query, queryDim: dim, matches });
