@@ -32,7 +32,12 @@ export default function UploadZone({ image, onImage, onClear }) {
       onDrop={handleDrop}
       role="button"
       tabIndex={0}
-      onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && inputRef.current?.click()}
+onKeyDown={(e) => {
+  if (e.target !== e.currentTarget) return;
+  if (e.key !== "Enter" && e.key !== " ") return;
+  e.preventDefault();
+  if (!image) inputRef.current?.click();
+}}
       aria-label="Upload a clothing image"
       style={{
         width: "100%", maxWidth: 480,
