@@ -17,12 +17,12 @@ export default function ImageSearch() {
 
   useEffect(() => {
     return () => {
-      if (imageURL) URL.revokeObjectURL(imageURL);
+      if (imageURL?.url) URL.revokeObjectURL(imageURL.url);
     };
   }, [imageURL]);
 
   const handleImage = (nextFile) => {
-    if (imageURL) URL.revokeObjectURL(imageURL);
+    if (imageURL?.url) URL.revokeObjectURL(imageURL.url);
     if (!nextFile?.type?.startsWith("image/")) {
       setFile(null);
       setImageURL(null);
@@ -32,14 +32,14 @@ export default function ImageSearch() {
       return;
     }
     setFile(nextFile);
-    setImageURL(URL.createObjectURL(nextFile));
+    setImageURL({ url: URL.createObjectURL(nextFile), trusted: true });
     setMatches([]);
     setError("");
     setHasSearched(false);
   };
 
   const handleClear = () => {
-    if (imageURL) URL.revokeObjectURL(imageURL);
+    if (imageURL?.url) URL.revokeObjectURL(imageURL.url);
     setFile(null);
     setImageURL(null);
     setMatches([]);

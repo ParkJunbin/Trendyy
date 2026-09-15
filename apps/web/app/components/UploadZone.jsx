@@ -62,9 +62,9 @@ export default function UploadZone({ image, onImage, onClear }) {
       {image ? (
         <>
           {/* Preview */}
-          {image.startsWith("blob:") && (
+          {image?.trusted === true && typeof image?.url === "string" && image.url.startsWith("blob:") && (
             <img
-              src={image}
+              src={image.url}
               alt="Uploaded item"
               style={{
                 width: "100%", height: "100%",
