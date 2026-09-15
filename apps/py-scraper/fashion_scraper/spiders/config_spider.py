@@ -50,9 +50,12 @@ class ConfigDrivenSpider(scrapy.Spider):
     def _listing_request_meta(self):
         return {
             "playwright": True,
+            "playwright_include_page": True,
             "playwright_page_methods": [
-                PageMethod("wait_for_timeout", self.listing_wait_ms),
-                PageMethod("wait_for_selector", self.product_selector),
+                PageMethod(
+                    "wait_for_timeout",
+                    self.playwright_config.get("listing_wait_ms", 3000)
+                )
             ],
         }
 
@@ -109,7 +112,12 @@ class ConfigDrivenSpider(scrapy.Spider):
 
     def start_requests(self):
         for url in self.start_urls:
-            yield scrapy.Request(url, meta=self._listing_request_meta(), errback=self.handle_error)
+            yield scrapy.Request(
+                url=url,
+                callback=self.parse,
+                errback=self.handle_error,
+                meta=self._listing_request_meta(),
+            )
 
     def parse(self, response):
         self._listing_status_guard(response)

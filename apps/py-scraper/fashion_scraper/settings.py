@@ -21,7 +21,13 @@ DOWNLOAD_DELAY = 1.5
 AUTOTHROTTLE_ENABLED = True
 ROBOTSTXT_OBEY = False
 
-USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+PLAYWRIGHT_BROWSER_TYPE = "chromium"
+
+PLAYWRIGHT_LAUNCH_OPTIONS = {
+    "headless": True,
+}
+
+USER_AGENT = None
 
 AWS_ACCESS_KEY_ID     = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
