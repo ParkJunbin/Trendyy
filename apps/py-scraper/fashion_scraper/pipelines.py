@@ -161,11 +161,7 @@ class FashionPipeline:
         """Download images and upload successful ones to S3."""
         s3_urls = []
         first_key = None
-
-        image_urls = item.get(
-            "images",
-            [item.get("image_url")]
-        )
+        image_urls = item.get("images") or [item.get("image_url")]
 
         for index, image_candidate in enumerate(image_urls):
 
