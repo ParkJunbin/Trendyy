@@ -21,7 +21,7 @@ export default function UploadZone({ image, onImage, onClear }) {
 
   const handleFile = (e) => {
     const file = e.target.files[0];
-    if (file) onImage(file);
+    if (file?.type?.startsWith("image/")) onImage(file);
   };
 
   return (
@@ -62,15 +62,17 @@ export default function UploadZone({ image, onImage, onClear }) {
       {image ? (
         <>
           {/* Preview */}
-          <img
-            src={image}
-            alt="Uploaded item"
-            style={{
-              width: "100%", height: "100%",
-              objectFit: "cover", borderRadius: 14,
-              position: "absolute", inset: 0,
-            }}
-          />
+          {image.startsWith("blob:") && (
+            <img
+              src={image}
+              alt="Uploaded item"
+              style={{
+                width: "100%", height: "100%",
+                objectFit: "cover", borderRadius: 14,
+                position: "absolute", inset: 0,
+              }}
+            />
+          )}
           {/* Clear button */}
           <button
             onClick={(e) => { e.stopPropagation(); onClear(); }}

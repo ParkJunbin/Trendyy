@@ -23,6 +23,14 @@ export default function ImageSearch() {
 
   const handleImage = (nextFile) => {
     if (imageURL) URL.revokeObjectURL(imageURL);
+    if (!nextFile?.type?.startsWith("image/")) {
+      setFile(null);
+      setImageURL(null);
+      setMatches([]);
+      setError("");
+      setHasSearched(false);
+      return;
+    }
     setFile(nextFile);
     setImageURL(URL.createObjectURL(nextFile));
     setMatches([]);
