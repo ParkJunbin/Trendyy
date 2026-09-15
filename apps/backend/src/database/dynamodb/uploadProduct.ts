@@ -2,7 +2,7 @@ import { getImageEmbedding } from "../../ai/embedImage";
 import { getImageTags, TagsResponse } from "../../ai/tagImage";
 import { rankProductsBySimilarity } from "../../helper/rank";
 import { uploadToS3, getPresignedUrl } from "../s3/s3";
-import { getAllProducts, ProductWithVector, saveProduct } from "./products";
+import { getScrapedProducts, ProductWithVector, saveProduct } from "./products";
 
 const DEFAULT_TAG_THRESHOLD = 0.6;
 const UPLOAD_PREFIX = "uploads";
@@ -81,7 +81,7 @@ export async function processUploadedProduct(
 
   await saveProduct(product);
 
-  const products = await getAllProducts();
+  const products = await getScrapedProducts();
   const topMatches = rankProductsBySimilarity(
     vector,
     products,
