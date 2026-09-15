@@ -431,7 +431,7 @@ class FashionPipeline:
     # Current Scrapy lifecycle API
     # ---------------------------------------------------------
 
-    def open_spider(self):
+    def open_spider(self, spider):
         """
         Initialize external clients when the spider opens.
 
